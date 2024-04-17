@@ -12,18 +12,20 @@ ROW_COUNT = 4
 COLUMN_COUNT = 4
 
 def create_board():
-	board = np.zeros((ROW_COUNT,COLUMN_COUNT))
+	# board = np.zeros((ROW_COUNT,COLUMN_COUNT))
+	# Initialise the board with -1
+	board = np.full((ROW_COUNT,COLUMN_COUNT), -1)
 	return board
 
 def drop_piece(board, row, col, piece):
 	board[row][col] = piece
 
 def is_valid_location(board, col):
-	return board[ROW_COUNT-1][col] == 0
+	return board[ROW_COUNT-1][col] == -1
 
 def get_next_open_row(board, col):
 	for r in range(ROW_COUNT):
-		if board[r][col] == 0:
+		if board[r][col] == -1:
 			return r
 
 def print_board(board):
@@ -62,9 +64,9 @@ def draw_board(board):
 	
 	for c in range(COLUMN_COUNT):
 		for r in range(ROW_COUNT):		
-			if board[r][c] == 1:
+			if board[r][c] == 0:
 				pygame.draw.circle(screen, RED, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
-			elif board[r][c] == 2: 
+			elif board[r][c] == 1: 
 				pygame.draw.circle(screen, YELLOW, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
 	pygame.display.update()
 
@@ -116,9 +118,9 @@ while not game_over:
 
 				if is_valid_location(board, col):
 					row = get_next_open_row(board, col)
-					drop_piece(board, row, col, 1)
+					drop_piece(board, row, col, 0)
 
-					if winning_move(board, 1):
+					if winning_move(board, 0):
 						label = myfont.render("Player 1 wins!!", 1, RED)
 						screen.blit(label, (40,10))
 						game_over = True
@@ -131,9 +133,9 @@ while not game_over:
 
 				if is_valid_location(board, col):
 					row = get_next_open_row(board, col)
-					drop_piece(board, row, col, 2)
+					drop_piece(board, row, col, 1)
 
-					if winning_move(board, 2):
+					if winning_move(board, 1):
 						label = myfont.render("Player 2 wins!!", 1, YELLOW)
 						screen.blit(label, (40,10))
 						game_over = True
