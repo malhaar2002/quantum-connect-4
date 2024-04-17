@@ -1,58 +1,78 @@
 import socket
 from _thread import *
-import sys
+import pickle
+from game import Game
+
+server = "localhost"
+port = 5555
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-server = 'localhost'
-port = 5555
-
-server_ip = socket.gethostbyname(server)
-
 try:
     s.bind((server, port))
-
 except socket.error as e:
-    print(str(e))
+    str(e)
 
 s.listen(2)
-print("Waiting for a connection")
+print("Waiting for a connection, Server Started")
 
-currentId = "0"
-pos = ["0:50,50", "1:100,100"]
-def threaded_client(conn):
-    global currentId, pos
-    conn.send(str.encode(currentId))
-    currentId = "1"
-    reply = ''
+connected = set()
+games = {}
+idCount = 0
+
+
+def threaded_client(conn, p, gameId):
+    global idCount
+    conn.send(str.encode(str(p)))
+
+    reply = ""
     while True:
         try:
-            data = conn.recv(2048)
-            reply = data.decode('utf-8')
-            if not data:
-                conn.send(str.encode("Goodbye"))
-                break
+            data = conn.recv(4096).decode()
+
+            if gameId in games:
+                game = games[gameId]
+
+                if not data:
+                    break
+                else:
+                    if data == "reset":
+                        game.reset()
+                    elif data != "get":
+                        data = data.split(",")
+                        print(f"Data: {data}")
+                        game.update_board(p, int(data[1]), 'P')
+
+                    conn.sendall(pickle.dumps(game))
             else:
-                print("Received: " + reply)
-                arr = reply.split(":")
-                id = int(arr[0])
-                pos[id] = reply
-
-                if id == 0: nid = 1
-                if id == 1: nid = 0
-
-                reply = pos[nid][:]
-                print("Sending: " + reply)
-
-            conn.sendall(str.encode(reply))
+                break
         except:
             break
 
-    print("Connection Closed")
+    print("Lost connection")
+    try:
+        del games[gameId]
+        print("Closing Game", gameId)
+    except:
+        pass
+    idCount -= 1
     conn.close()
+
+
 
 while True:
     conn, addr = s.accept()
-    print("Connected to: ", addr)
+    print("Connected to:", addr)
 
-    start_new_thread(threaded_client, (conn,))
+    idCount += 1
+    p = 0
+    gameId = (idCount - 1)//2
+    if idCount % 2 == 1:
+        games[gameId] = Game(gameId)
+        print("Creating a new game...")
+    else:
+        games[gameId].ready = True
+        p = 1
+
+
+    start_new_thread(threaded_client, (conn, p, gameId))

@@ -1,149 +1,157 @@
+from qiskit import QuantumCircuit, Aer, execute
+from qiskit import *
 import numpy as np
-import pygame
-import sys
-import math
-from network import Network
+import matplotlib
 
-BLUE = (0,0,255)
-BLACK = (0,0,0)
-RED = (255,0,0)
-YELLOW = (255,255,0)
 
 class Game:
-    def __init__(self):
-        self.ROW_COUNT = 4
-        self.COLUMN_COUNT = 4
-        self.SQUARESIZE = 100
-        self.RADIUS = int(self.SQUARESIZE/2 - 5)
-        self.width = self.COLUMN_COUNT * self.SQUARESIZE
-        self.height = (self.ROW_COUNT+1) * self.SQUARESIZE
-        self.board = np.full((self.ROW_COUNT,self.COLUMN_COUNT), -1)
-        self.turn = 1
-        self.run()
+    def __init__(self, id):
+        self.id = id
+        self.ready = False
+        self.board = np.full((4, 4), -1)  # Initialize the board
+        self.board[3] = [0, 1, 0, 1]  # Initial configuration
+        self.qr = QuantumRegister(4)
+        self.cr = ClassicalRegister(4)
+        self.qc = QuantumCircuit(self.qr, self.cr)
+        # self.qc = QuantumCircuit(4, 4)  
+        self.secret_x_pending = [0] * 4  # Track pending secret X gates
+        self.state_before_hgate = [-1] * 4
+        self.h_flag = [0] * 4
+        self.r_flag = 0
 
-    def drop_piece(self, row, col, piece):
-        self.board[row][col] = piece
+        # Apply initial X gates based on the board's configuration
+        for qubit in range(4):
+            if self.board[3][qubit] == 1:
+                self.qc.x(qubit)
 
-    def is_valid_location(self, col):
-        return self.board[self.ROW_COUNT-1][col] == -1
+    def apply_pending_secret_x(self, qubit):
+        while self.secret_x_pending[qubit] > 0:
+            self.qc.x(qubit)
+            self.secret_x_pending[qubit] -= 1
 
-    def get_next_open_row(self, col):
-        for r in range(self.ROW_COUNT):
-            if self.board[r][col] == -1:
-                return r
+    def measure_qubit(self, qubit):
+        self.apply_pending_secret_x(qubit)  # Apply pending X before measurement
 
-    def print_board(self):
-        print(np.flip(self.board, 0))
+        temp_qc = self.qc.copy()
+        temp_qc.measure(qubit, qubit)
+        backend = Aer.get_backend('qasm_simulator')
+        job = execute(temp_qc, backend, shots=1)
+        result = job.result()
+        counts = result.get_counts(temp_qc)
+        measured_value = int(list(counts.keys())[0][3 - qubit])
+        return measured_value
 
-    def winning_move(self, piece):
-        # Check horizontal locations for win
-        for c in range(self.COLUMN_COUNT-3):
-            for r in range(self.ROW_COUNT):
-                if self.board[r][c] == piece and self.board[r][c+1] == piece and self.board[r][c+2] == piece and self.board[r][c+3] == piece:
-                    return True
-
-        # Check vertical locations for win
-        for c in range(self.COLUMN_COUNT):
-            for r in range(self.ROW_COUNT-3):
-                if self.board[r][c] == piece and self.board[r+1][c] == piece and self.board[r+2][c] == piece and self.board[r+3][c] == piece:
-                    return True
-
-        # Check positively sloped diaganols
-        for c in range(self.COLUMN_COUNT-3):
-            for r in range(self.ROW_COUNT-3):
-                if self.board[r][c] == piece and self.board[r+1][c+1] == piece and self.board[r+2][c+2] == piece and self.board[r+3][c+3] == piece:
-                    return True
-
-        # Check negatively sloped diaganols
-        for c in range(self.COLUMN_COUNT-3):
-            for r in range(3, self.ROW_COUNT):
-                if self.board[r][c] == piece and self.board[r-1][c+1] == piece and self.board[r-2][c+2] == piece and self.board[r-3][c+3] == piece:
-                    return True
-
-    def draw_board(self):
-        for c in range(self.COLUMN_COUNT):
-            for r in range(self.ROW_COUNT):
-                pygame.draw.rect(self.screen, BLUE, (c*self.SQUARESIZE, r*self.SQUARESIZE+self.SQUARESIZE, self.SQUARESIZE, self.SQUARESIZE))
-                pygame.draw.circle(self.screen, BLACK, (int(c*self.SQUARESIZE+self.SQUARESIZE/2), int(r*self.SQUARESIZE+self.SQUARESIZE+self.SQUARESIZE/2)), self.RADIUS)
+    def update_board(self, player, qubit, action):
+        if action == 'X':
+            # Mark a secret X gate for future application
+            self.secret_x_pending[qubit] += 1
+            return  
         
-        for c in range(self.COLUMN_COUNT):
-            for r in range(self.ROW_COUNT):		
-                if self.board[r][c] == 0:
-                    pygame.draw.circle(self.screen, RED, (int(c*self.SQUARESIZE+self.SQUARESIZE/2), self.height-int(r*self.SQUARESIZE+self.SQUARESIZE/2)), self.RADIUS)
-                elif self.board[r][c] == 1: 
-                    pygame.draw.circle(self.screen, YELLOW, (int(c*self.SQUARESIZE+self.SQUARESIZE/2), self.height-int(r*self.SQUARESIZE+self.SQUARESIZE/2)), self.RADIUS)
-        pygame.display.update()
+        if action == 'H':
+            self.h_flag[qubit] +=1
+            self.state_before_hgate[qubit] = self.measure_qubit(qubit) 
+            self.qc.h(qubit)
+            return 
+        
+        if action == 'S':
+            self.qc.swap(self.qr[qubit[0]], self.qr[qubit[1]])
+            # Update value of first qubit after swapping
+            measured_value = self.measure_qubit(qubit[0])
+            for row in reversed(range(4)):
+                if self.board[row][qubit[0]] == -1:
+                    self.board[row][qubit[0]] = measured_value
+                    break
+            # Update value of second qubit after swapping
+            measured_value = self.measure_qubit(qubit[1])
+            for row in reversed(range(4)):
+                if self.board[row][qubit[1]] == -1:
+                    self.board[row][qubit[1]] = measured_value
+                    break
+            print(f"Player {player} updated the board:")
+            print(self.board)
+            return
+        
+        if action == 'R':
+            self.r_flag +=1
+            return
 
-    def run(self):
-        self.print_board()
-        game_over = False
-        turn = 0
+        # Desired outcome aligns with the player's identity (0 or 1)
+        desired_outcome = player
 
-        pygame.init()
+        # If there is rotation flag, change the qubit of the player
+        if self.r_flag:
+            qubit = 3 - qubit
+            self.r_flag -=1
 
-        size = (self.width, self.height)
+        if self.secret_x_pending[qubit]== 0:
+            # Measured when no  X gate applied on the qubit. 
+            current_state = self.measure_qubit(qubit) 
+        elif self.state_before_hgate[qubit]==0 or self.state_before_hgate[qubit]==1:
+            current_state= self.state_before_hgate[qubit]
+            self.state_before_hgate[qubit] = -1
+        else:
+            # We only want to measure if there is no X gate applied to that qubit. But if there is 1, we reverse the qubit being measured because the other player when playing their turn won't havre an idea of the X gate. 
+            current_state = self.measure_qubit(qubit)
+            # print(self.secret_x_pending[qubit])
+            current_state = 1- current_state
+        
+        if current_state != desired_outcome:
+            self.qc.x(qubit)  # Apply an X gate to achieve desired outcome
+
+        if self.h_flag[qubit] ==0:
+            measured_value = self.measure_qubit(qubit)  # Measure after adjustments
+        else:
+            # initialising value after Hadamard gate
+            measured_value = self.measure_qubit(qubit)
+            self.h_flag[qubit] -=1
+            if measured_value ==1:
+                self.qc.initialize([0, 1], qubit)
+            else:
+                self.qc.initialize([1, 0], qubit)
+
+        # Update the board in the lowest available row for the qubit
+        for row in reversed(range(4)):
+            if self.board[row][qubit] == -1:
+                self.board[row][qubit] = measured_value
+                break
+        print(f"Player {player} updated the board:")
+
+        print(self.board)
+        return self.board
+
+    def win_condition(self):
+        # Check for a win condition
+        for row in range(4):
+            if self.board[row][0] == self.board[row][1] == self.board[row][2] == self.board[row][3] != -1:
+                return True
+
+        for col in range(4):
+            if self.board[0][col] == self.board[1][col] == self.board[2][col] == self.board[3][col] != -1:
+                return True
+
+        if self.board[0][0] == self.board[1][1] == self.board[2][2] == self.board[3][3] != -1:
+            return True
+
+        if self.board[0][3] == self.board[1][2] == self.board[2][1] == self.board[3][0] != -1:
+            return True
+
+        return False
 
 
-        self.screen = pygame.display.set_mode(size)
-        self.draw_board()
-        pygame.display.update()
 
-        myfont = pygame.font.SysFont("monospace", 75)
+    def play_game(self):
+        current_player = 0
+        while True:
+            print(f"\nPlayer {current_player}'s turn.")
+            qubit = int(input("Choose a qubit to interact with (0-3): "))
+            action = input("Type 'X' for X gate, 'H' for H gate, 'S' for Swap gate or 'P' to measure and place: ").upper()
+            if action == 'S':
+                other_qubit = int(input("Choose the other qubit to swap the First qubit with:"))
+                qubit = [qubit, other_qubit]
 
-        while not game_over:
+            self.update_board(current_player, qubit, action)
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
+            # We will Implement win condition check and full board check here
 
-                if event.type == pygame.MOUSEMOTION:
-                    pygame.draw.rect(self.screen, BLACK, (0,0, self.width, self.SQUARESIZE))
-                    posx = event.pos[0]
-                    if turn == 0:
-                        pygame.draw.circle(self.screen, RED, (posx, int(self.SQUARESIZE/2)), self.RADIUS)
-                    else: 
-                        pygame.draw.circle(self.screen, YELLOW, (posx, int(self.SQUARESIZE/2)), self.RADIUS)
-                pygame.display.update()
-
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    pygame.draw.rect(self.screen, BLACK, (0,0, self.width, self.SQUARESIZE))
-                    #print(event.pos)
-                    # Ask for Player 1 Input
-                    if turn == 0:
-                        posx = event.pos[0]
-                        col = int(math.floor(posx/self.SQUARESIZE))
-
-                        if self.is_valid_location(col):
-                            row = self.get_next_open_row(col)
-                            self.drop_piece(row, col, 0)
-
-                            if self.winning_move(0):
-                                label = myfont.render("Player 1 wins!!", 1, RED)
-                                self.screen.blit(label, (40,10))
-                                game_over = True
-
-
-                    # # Ask for Player 2 Input
-                    else:				
-                        posx = event.pos[0]
-                        col = int(math.floor(posx/self.SQUARESIZE))
-
-                        if self.is_valid_location(col):
-                            row = self.get_next_open_row(col)
-                            self.drop_piece(row, col, 1)
-
-                            if self.winning_move(1):
-                                label = myfont.render("Player 2 wins!!", 1, YELLOW)
-                                self.screen.blit(label, (40,10))
-                                game_over = True
-
-                    self.print_board()
-                    self.draw_board()
-
-                    turn += 1
-                    turn = turn % 2
-
-                    if game_over:
-                        pygame.time.wait(3000)
-
-game = Game()
+            # Switch to the next player
+            current_player = 1 - current_player
