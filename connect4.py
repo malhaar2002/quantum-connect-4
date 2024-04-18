@@ -2,14 +2,21 @@ import numpy as np
 import pygame
 import sys
 import math
+# from project_code import QuantumGameInteractive
 
 BLUE = (0,0,255)
 BLACK = (0,0,0)
 RED = (255,0,0)
 YELLOW = (255,255,0)
 
-ROW_COUNT = 4
-COLUMN_COUNT = 4
+ROW_COUNT = 6
+COLUMN_COUNT = 7
+
+# game = QuantumGameInteractive()
+
+# Add the quantum gates and their counts for each player
+player_gates = {0: {"NOT": 2, "HADAMARD": 2, "SWAP": 2, "ROTATION": 2},
+                1: {"NOT": 2, "HADAMARD": 2, "SWAP": 2, "ROTATION": 2}}
 
 def create_board():
 	# board = np.zeros((ROW_COUNT,COLUMN_COUNT))
@@ -17,8 +24,15 @@ def create_board():
 	board = np.full((ROW_COUNT,COLUMN_COUNT), -1)
 	return board
 
+# Function to draw buttons for quantum gates along with their counts
+# def draw_buttons():
+
+
+
 def drop_piece(board, row, col, piece):
 	board[row][col] = piece
+	# board = game.update_board(piece, col, 'P')
+
 
 def is_valid_location(board, col):
 	return board[ROW_COUNT-1][col] == -1
@@ -75,15 +89,16 @@ board = create_board()
 print_board(board)
 game_over = False
 turn = 0
+# game = project_code.QuantumGameInteractive()
 
 pygame.init()
 
-SQUARESIZE = 100
+SQUARESIZE = 90
 
 width = COLUMN_COUNT * SQUARESIZE
 height = (ROW_COUNT+1) * SQUARESIZE
 
-size = (width, height)
+size = (width+2, height+2)
 
 RADIUS = int(SQUARESIZE/2 - 5)
 
@@ -106,7 +121,11 @@ while not game_over:
 				pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), RADIUS)
 			else: 
 				pygame.draw.circle(screen, YELLOW, (posx, int(SQUARESIZE/2)), RADIUS)
+
+		# Draw the buttons for quantum gates
+		# draw_buttons()
 		pygame.display.update()
+		# pygame.display.update()
 
 		if event.type == pygame.MOUSEBUTTONDOWN:
 			pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
@@ -124,6 +143,10 @@ while not game_over:
 						label = myfont.render("Player 1 wins!!", 1, RED)
 						screen.blit(label, (40,10))
 						game_over = True
+					elif np.all(board != -1):
+						label = myfont.render("It's a draw!!", 1, RED)
+						screen.blit(label, (40,10))
+						game_over = True
 
 
 			# # Ask for Player 2 Input
@@ -137,6 +160,10 @@ while not game_over:
 
 					if winning_move(board, 1):
 						label = myfont.render("Player 2 wins!!", 1, YELLOW)
+						screen.blit(label, (40,10))
+						game_over = True
+					elif np.all(board != -1):
+						label = myfont.render("It's a draw!!", 1, YELLOW)
 						screen.blit(label, (40,10))
 						game_over = True
 
