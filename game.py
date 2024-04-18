@@ -8,6 +8,7 @@ class Game:
     def __init__(self, id):
         self.id = id
         self.ready = False
+        self.current_player = 0
         self.board = np.full((4, 4), -1)  # Initialize the board
         self.board[3] = [0, 1, 0, 1]  # Initial configuration
         self.qr = QuantumRegister(4)
@@ -23,6 +24,9 @@ class Game:
         for qubit in range(4):
             if self.board[3][qubit] == 1:
                 self.qc.x(qubit)
+
+    def connected(self):
+        return self.ready
 
     def apply_pending_secret_x(self, qubit):
         while self.secret_x_pending[qubit] > 0:
@@ -117,6 +121,7 @@ class Game:
         print(f"Player {player} updated the board:")
 
         print(self.board)
+        self.current_player = 1 - self.current_player
         return self.board
 
     def win_condition(self):
@@ -140,18 +145,13 @@ class Game:
 
 
     def play_game(self):
-        current_player = 0
+        self.current_player = 0
         while True:
-            print(f"\nPlayer {current_player}'s turn.")
+            print(f"\nPlayer {self.current_player}'s turn.")
             qubit = int(input("Choose a qubit to interact with (0-3): "))
             action = input("Type 'X' for X gate, 'H' for H gate, 'S' for Swap gate or 'P' to measure and place: ").upper()
             if action == 'S':
                 other_qubit = int(input("Choose the other qubit to swap the First qubit with:"))
                 qubit = [qubit, other_qubit]
 
-            self.update_board(current_player, qubit, action)
-
-            # We will Implement win condition check and full board check here
-
-            # Switch to the next player
-            current_player = 1 - current_player
+            self.update_board(self.current_player, qubit, action)

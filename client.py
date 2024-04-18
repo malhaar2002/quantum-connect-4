@@ -44,7 +44,6 @@ def main():
     board = create_board()
     print_board(board)
     game_over = False
-    turn = 0
 
     pygame.init()
 
@@ -81,7 +80,7 @@ def main():
             if event.type == pygame.MOUSEMOTION:
                 pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
                 posx = event.pos[0]
-                if turn == 0:
+                if game.current_player == 0:
                     pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), RADIUS)
                 else: 
                     pygame.draw.circle(screen, YELLOW, (posx, int(SQUARESIZE/2)), RADIUS)
@@ -90,23 +89,21 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
 
-                posx = event.pos[0]
-                col = int(math.floor(posx/SQUARESIZE))
+                if game.current_player == player:
+                    posx = event.pos[0]
+                    col = int(math.floor(posx/SQUARESIZE))
 
-                # send to server
-                n.send(f"{turn}, {col}")
-                board = np.flip(game.board, 0)
+                    # send to server
+                    n.send(f"{game.current_player}, {col}")
+                    board = np.flip(game.board, 0)
 
-                if game.win_condition():
-                    label = myfont.render(f"Player {turn} wins!!", 1, RED)
-                    screen.blit(label, (40,10))
-                    game_over = True
+                    if game.win_condition():
+                        label = myfont.render(f"Player {game.current_player} wins!!", 1, RED)
+                        screen.blit(label, (40,10))
+                        game_over = True
 
-                print_board(board)
-                draw_board(board, screen, SQUARESIZE, RADIUS, height)
-
-                turn += 1
-                turn = turn % 2
+                    print_board(board)
+                    draw_board(board, screen, SQUARESIZE, RADIUS, height)
 
                 if game_over:
                     pygame.time.wait(3000)
