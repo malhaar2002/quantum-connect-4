@@ -24,11 +24,6 @@ def create_board():
 	board = np.full((ROW_COUNT,COLUMN_COUNT), -1)
 	return board
 
-# Function to draw buttons for quantum gates along with their counts
-# def draw_buttons():
-
-
-
 def drop_piece(board, row, col, piece):
 	board[row][col] = piece
 	# board = game.update_board(piece, col, 'P')
@@ -69,20 +64,66 @@ def winning_move(board, piece):
 		for r in range(3, ROW_COUNT):
 			if board[r][c] == piece and board[r-1][c+1] == piece and board[r-2][c+2] == piece and board[r-3][c+3] == piece:
 				return True
-
+			
 def draw_board(board):
-	for c in range(COLUMN_COUNT):
-		for r in range(ROW_COUNT):
-			pygame.draw.rect(screen, BLUE, (c*SQUARESIZE, r*SQUARESIZE+SQUARESIZE, SQUARESIZE, SQUARESIZE))
-			pygame.draw.circle(screen, BLACK, (int(c*SQUARESIZE+SQUARESIZE/2), int(r*SQUARESIZE+SQUARESIZE+SQUARESIZE/2)), RADIUS)
+    for c in range(COLUMN_COUNT):
+        for r in range(ROW_COUNT):
+            pygame.draw.rect(screen, BLUE, (c*SQUARESIZE, r*SQUARESIZE+SQUARESIZE, SQUARESIZE, SQUARESIZE))
+            pygame.draw.circle(screen, BLACK, (int(c*SQUARESIZE+SQUARESIZE/2), int(r*SQUARESIZE+SQUARESIZE+SQUARESIZE/2)), RADIUS)
+
+    for c in range(COLUMN_COUNT):
+        for r in range(ROW_COUNT):     
+            if board[r][c] == 0:
+                pygame.draw.circle(screen, RED, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
+            elif board[r][c] == 1: 
+                pygame.draw.circle(screen, YELLOW, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
+    pygame.display.update()
+
+def draw_buttons():	
+	button_surface = pygame.Surface((50, 50))
 	
-	for c in range(COLUMN_COUNT):
-		for r in range(ROW_COUNT):		
-			if board[r][c] == 0:
-				pygame.draw.circle(screen, RED, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
-			elif board[r][c] == 1: 
-				pygame.draw.circle(screen, YELLOW, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
-	pygame.display.update()
+	text = myfont.render("NOT", True, (0, 0, 0))
+	text_rect = text.get_rect(center=(button_surface.get_width()/2, button_surface.get_height()/2))
+
+	button_rect = pygame.Rect(125, 125, 50, 50)
+
+	return button_rect
+
+    #button_margin = 10
+	#button_width = 100
+    #button_height = 50
+
+    #button_positions = [
+    #    (width - button_width - button_margin, button_margin),
+    #    (width - button_width - button_margin, button_margin + button_height + button_margin),
+    #    (width - button_width - button_margin, button_margin + 2*(button_height + button_margin)),
+    #    (width - button_width - button_margin, button_margin + 3*(button_height + button_margin))
+    #]
+
+    #button_texts = ["Button 1", "Button 2", "Button 3", "Button 4"]
+
+    #for i, (x, y) in enumerate(button_positions):
+    #    pygame.draw.rect(screen, RED, (x, y, button_width, button_height))
+    #    button_text = myfont.render(button_texts[i], True, BLACK)
+    #    screen.blit(button_text, (x + 10, y + 10))
+
+    #pygame.display.update()
+
+def handle_click(pos):
+    button_margin = 10
+    button_width = 100
+    button_height = 50
+
+    button_positions = [
+        (width - button_width - button_margin, button_margin),
+        (width - button_width - button_margin, button_margin + button_height + button_margin),
+        (width - button_width - button_margin, button_margin + 2*(button_height + button_margin)),
+        (width - button_width - button_margin, button_margin + 3*(button_height + button_margin))
+    ]
+
+    for i, (x, y) in enumerate(button_positions):
+        if x <= pos[0] <= x + button_width and y <= pos[1] <= y + button_height:
+            print(f"Button {i+1} clicked!")
 
 
 board = create_board()
@@ -98,21 +139,27 @@ SQUARESIZE = 90
 width = COLUMN_COUNT * SQUARESIZE
 height = (ROW_COUNT+1) * SQUARESIZE
 
-size = (width+2, height+2)
+size = (width+5, height+5)
 
 RADIUS = int(SQUARESIZE/2 - 5)
 
 screen = pygame.display.set_mode(size)
+myfont = pygame.font.SysFont("monospace", 75)
+
 draw_board(board)
+draw_buttons()
 pygame.display.update()
 
-myfont = pygame.font.SysFont("monospace", 75)
 
 while not game_over:
 
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			sys.exit()
+		
+		if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+			pos = pygame.mouse.get_pos()
+			handle_click(pos)
 
 		if event.type == pygame.MOUSEMOTION:
 			pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
