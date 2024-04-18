@@ -101,12 +101,16 @@ def main():
                         label = myfont.render(f"Player {game.current_player} wins!!", 1, RED)
                         screen.blit(label, (40,10))
                         game_over = True
+                    elif np.all(board != -1):
+                        label = myfont.render(f"It's a Draw", 1, RED)
+                        screen.blit(label, (40,10))
+                        game_over = True
 
                     print_board(board)
                     draw_board(board, screen, SQUARESIZE, RADIUS, height)
 
                 if game_over:
-                    pygame.time.wait(3000)
+                    pygame.time.wait(1000)
 
 if __name__ == "__main__":
     main()
