@@ -16,6 +16,7 @@ class QuantumGameInteractive:
         self.state_before_hgate = [-1] * 4
         self.h_flag = [0] * 4
         self.r_flag = 0
+        self.filled_column = [0]*4
 
         # Apply initial X gates based on the board's configuration
         for qubit in range(4):
@@ -39,7 +40,7 @@ class QuantumGameInteractive:
         measured_value = int(list(counts.keys())[0][3 - qubit])
         return measured_value
 
-    def update_board(self, player, qubit, action):
+    def update_board(self, player, qubit, action):   
         if action == 'X':
             # Mark a secret X gate for future application
             self.secret_x_pending[qubit] += 1
@@ -116,6 +117,8 @@ class QuantumGameInteractive:
         print(f"Player {player} updated the board:")
 
         print(self.board)
+        if self.board[0][qubit] != -1:
+            self.filled_column[qubit] = 1
         return self.board
     
     def win_condition(self):
@@ -145,6 +148,15 @@ class QuantumGameInteractive:
             if action == 'S':
                 other_qubit = int(input("Choose the other qubit to swap the First qubit with:"))
                 qubit = [qubit, other_qubit]
+
+            if self.filled_column[qubit] == 1:
+                print("Invalid move. Column is full.")
+                qubit = int(input("Choose a qubit to interact with (0-3): "))
+                action = input("Type 'X' for X gate, 'H' for H gate, 'S' for Swap gate, 'R' for Rotation gate or 'P' to measure and place: ").upper()
+                if action == 'S':
+                    other_qubit = int(input("Choose the other qubit to swap the First qubit with:"))
+                    qubit = [qubit, other_qubit]
+                continue
 
             self.update_board(current_player, qubit, action)
 
