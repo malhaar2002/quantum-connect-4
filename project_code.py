@@ -1,14 +1,11 @@
+
 from qiskit import QuantumCircuit, Aer, execute
 from qiskit import *
 import numpy as np
 import matplotlib
 
-
-class Game:
-    def __init__(self, id):
-        self.id = id
-        self.ready = False
-        self.current_player = 0
+class QuantumGameInteractive:
+    def __init__(self):
         self.board = np.full((4, 4), -1)  # Initialize the board
         self.board[3] = [0, 1, 0, 1]  # Initial configuration
         self.qr = QuantumRegister(4)
@@ -19,14 +16,12 @@ class Game:
         self.state_before_hgate = [-1] * 4
         self.h_flag = [0] * 4
         self.r_flag = 0
+        self.filled_column = [0]*4
 
         # Apply initial X gates based on the board's configuration
         for qubit in range(4):
             if self.board[3][qubit] == 1:
                 self.qc.x(qubit)
-
-    def connected(self):
-        return self.ready
 
     def apply_pending_secret_x(self, qubit):
         while self.secret_x_pending[qubit] > 0:
@@ -45,7 +40,7 @@ class Game:
         measured_value = int(list(counts.keys())[0][3 - qubit])
         return measured_value
 
-    def update_board(self, player, qubit, action):
+    def update_board(self, player, qubit, action):   
         if action == 'X':
             # Mark a secret X gate for future application
             self.secret_x_pending[qubit] += 1
@@ -55,6 +50,7 @@ class Game:
             self.h_flag[qubit] +=1
             self.state_before_hgate[qubit] = self.measure_qubit(qubit) 
             self.qc.h(qubit)
+            print(f"Player {player} played Hadamard gate on {qubit}:")
             return 
         
         if action == 'S':
@@ -63,15 +59,15 @@ class Game:
             measured_value = self.measure_qubit(qubit[0])
             for row in reversed(range(4)):
                 if self.board[row][qubit[0]] == -1:
-                    self.board[row][qubit[0]] = measured_value
+                    self.board[row+1][qubit[0]] = measured_value
                     break
             # Update value of second qubit after swapping
             measured_value = self.measure_qubit(qubit[1])
             for row in reversed(range(4)):
                 if self.board[row][qubit[1]] == -1:
-                    self.board[row][qubit[1]] = measured_value
+                    self.board[row+1][qubit[1]] = measured_value
                     break
-            print(f"Player {player} updated the board:")
+            print(f"Player {player} updated the board")
             print(self.board)
             return
         
@@ -121,9 +117,10 @@ class Game:
         print(f"Player {player} updated the board:")
 
         print(self.board)
-        self.current_player = 1 - self.current_player
+        if self.board[0][qubit] != -1:
+            self.filled_column[qubit] = 1
         return self.board
-
+    
     def win_condition(self):
         # Check for a win condition
         for row in range(4):
@@ -142,16 +139,42 @@ class Game:
 
         return False
 
-
-
     def play_game(self):
-        self.current_player = 0
+        current_player = 0
         while True:
-            print(f"\nPlayer {self.current_player}'s turn.")
+            print(f"\nPlayer {current_player}'s turn.")
             qubit = int(input("Choose a qubit to interact with (0-3): "))
-            action = input("Type 'X' for X gate, 'H' for H gate, 'S' for Swap gate or 'P' to measure and place: ").upper()
+            action = input("Type 'X' for X gate, 'H' for H gate, 'S' for Swap gate, 'R' for Rotation gate or 'P' to measure and place: ").upper()
             if action == 'S':
                 other_qubit = int(input("Choose the other qubit to swap the First qubit with:"))
                 qubit = [qubit, other_qubit]
 
-            self.update_board(self.current_player, qubit, action)
+            if self.filled_column[qubit] == 1:
+                print("Invalid move. Column is full.")
+                qubit = int(input("Choose a qubit to interact with (0-3): "))
+                action = input("Type 'X' for X gate, 'H' for H gate, 'S' for Swap gate, 'R' for Rotation gate or 'P' to measure and place: ").upper()
+                if action == 'S':
+                    other_qubit = int(input("Choose the other qubit to swap the First qubit with:"))
+                    qubit = [qubit, other_qubit]
+                continue
+
+            self.update_board(current_player, qubit, action)
+
+            if self.win_condition():
+                print(f"Player {current_player} wins!")
+                break
+            elif np.all(self.board != -1):
+                print("It's a draw!")
+                break
+
+            # We will Implement win condition check and full board check here
+
+            # Switch to the next player
+            current_player = 1 - current_player
+
+game = QuantumGameInteractive()
+game.play_game()
+
+
+
+
