@@ -104,14 +104,25 @@ def main():
                     if posx < board_width - RADIUS:
                         # clicked on the game board
                         col = int(math.floor(posx/SQUARESIZE))
-                        n.send(f"{game.current_player}, {col}, P")
+                        n.send(f"{game.current_player},{col},P")
                         board = np.flip(game.board, 0)
                         print_board(board)
                         draw_board(board, screen, SQUARESIZE, RADIUS, height)
                     elif button.collidepoint(event.pos):
-                        # clicked on the button side
-                        n.send(f"{game.current_player}, 0, X")
-                        print("Not Gate applied")
+                        label = pygame.font.SysFont("monospace", 30).render("Choose column to apply Not Gate", 1, RED)
+                        screen.blit(label, (40,10))
+                        pygame.display.update()
+                        chosen_column = False
+                        while not chosen_column:
+                            for event in pygame.event.get():
+                                if event.type == pygame.MOUSEBUTTONDOWN:
+                                    posx = event.pos[0]
+                                    if posx < board_width - RADIUS:
+                                        col = int(math.floor(posx/SQUARESIZE))
+                                        chosen_column = True
+                                        n.send(f"{game.current_player},{col},X")
+                                        print("Not Gate applied")
+                                        break
 
                     if game.win_condition():
                         label = myfont.render(f"Player {game.current_player} wins!!", 1, RED)

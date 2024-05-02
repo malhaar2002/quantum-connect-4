@@ -49,12 +49,14 @@ class Game:
         if action == 'X':
             # Mark a secret X gate for future application
             self.secret_x_pending[qubit] += 1
+            self.current_player = 1 - self.current_player
             return  
         
         if action == 'H':
             self.h_flag[qubit] +=1
             self.state_before_hgate[qubit] = self.measure_qubit(qubit) 
             self.qc.h(qubit)
+            self.current_player = 1 - self.current_player
             return 
         
         if action == 'S':
@@ -73,10 +75,12 @@ class Game:
                     break
             print(f"Player {player} updated the board:")
             print(self.board)
+            self.current_player = 1 - self.current_player
             return
         
         if action == 'R':
             self.r_flag +=1
+            self.current_player = 1 - self.current_player
             return
 
         # Desired outcome aligns with the player's identity (0 or 1)
