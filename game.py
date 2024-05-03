@@ -1,17 +1,17 @@
 from qiskit import QuantumCircuit, Aer, execute
 from qiskit import *
 import numpy as np
-import matplotlib
+from constants import ROW_COUNT, COLUMN_COUNT
 
 class Game:
     def __init__(self, id):
         self.id = id
         self.ready = False
         self.current_player = 0
-        self.board = np.full((6, 6), -1)  # Initialize the board
+        self.board = np.full((ROW_COUNT, COLUMN_COUNT), -1)  # Initialize the board
         self.board[5] = [0, 1, 0, 1, 0, 1]  # Initial configuration
-        self.qr = QuantumRegister(6)  
-        self.cr = ClassicalRegister(6)
+        self.qr = QuantumRegister(COLUMN_COUNT)  
+        self.cr = ClassicalRegister(COLUMN_COUNT)
         self.qc = QuantumCircuit(self.qr, self.cr)
         # self.qc = QuantumCircuit(4, 4)  
         self.secret_x_pending = [0] * 6  # Track pending secret X gates

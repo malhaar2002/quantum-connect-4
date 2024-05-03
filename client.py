@@ -3,14 +3,7 @@ from network import Network
 import numpy as np
 import sys
 import math
-
-BLUE = (0,0,255)
-BLACK = (0,0,0)
-RED = (255,0,0)
-YELLOW = (255,255,0)
-
-ROW_COUNT = 6
-COLUMN_COUNT = 6
+from constants import *
 
 def create_board():
     board = np.full((ROW_COUNT,COLUMN_COUNT), -1)
@@ -53,15 +46,10 @@ def main():
 
     pygame.init()
 
-    SQUARESIZE = 150
-
     board_width = COLUMN_COUNT * SQUARESIZE
     window_width = COLUMN_COUNT * SQUARESIZE * 1.5
     height = (ROW_COUNT+1) * SQUARESIZE
-
     size = (window_width, height)
-
-    RADIUS = int(SQUARESIZE/2 - 15)
 
     screen = pygame.display.set_mode(size)
     pygame.display.set_caption("Quantum Connect Four")

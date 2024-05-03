@@ -2,14 +2,12 @@ import socket
 from _thread import *
 import pickle
 from game import Game
-
-server = "10.1.18.172"
-port = 5555
+from constants import SERVER_IP, SERVER_PORT
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 try:
-    s.bind((server, port))
+    s.bind((SERVER_IP, SERVER_PORT))
 except socket.error as e:
     str(e)
 
