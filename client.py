@@ -36,6 +36,51 @@ def create_button(screen, x, y, width, height, text, text_color, button_color):
     screen.blit(text_surface, text_rect)
     return text_rect
 
+def choose_gate(screen, n, game, gate_name, gate_symbol):
+    label = pygame.font.SysFont("monospace", 30).render(f"Choose column to apply {gate_name}", 1, RED)
+    screen.blit(label, (40,10))
+    pygame.display.update()
+    chosen_column = False
+    while not chosen_column:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                posx = event.pos[0]
+                if posx < BOARD_WIDTH - RADIUS:
+                    col = int(math.floor(posx/SQUARESIZE))
+                    chosen_column = True
+                    n.send(f"{game.current_player},{col},{gate_symbol}")
+                    print(f"{gate_name} applied")
+                    break
+
+def choose_swap_gate(screen, n, game):
+    col1, col2 = None, None
+    chosen_column_1, chosen_column_2 = False, False
+    label = pygame.font.SysFont("monospace", 30).render(f"Choose Column 1 for SWAP", 1, RED)
+    screen.blit(label, (40,10))
+    pygame.display.update()
+    while not chosen_column_1:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                posx = event.pos[0]
+                if posx < BOARD_WIDTH - RADIUS:
+                    col1 = int(math.floor(posx/SQUARESIZE))
+                    chosen_column_1 = True
+                    break
+    pygame.draw.rect(screen, BLACK, (0,0, BOARD_WIDTH, SQUARESIZE))
+    label = pygame.font.SysFont("monospace", 30).render(f"Choose Column 2 for SWAP", 1, RED)
+    screen.blit(label, (40,10))
+    pygame.display.update()
+    while not chosen_column_2:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                posx = event.pos[0]
+                if posx < BOARD_WIDTH - RADIUS:
+                    col2 = int(math.floor(posx/SQUARESIZE))
+                    chosen_column_2 = True
+                    break
+    n.send(f"{game.current_player},{col1},{col2},S")
+    print(f"Swap Gate applied")
+
 def main():
     n = Network()
     player = int(n.getP())
@@ -46,8 +91,7 @@ def main():
 
     pygame.init()
 
-    board_width = COLUMN_COUNT * SQUARESIZE
-    window_width = COLUMN_COUNT * SQUARESIZE * 1.5
+    window_width = BOARD_WIDTH * 1.5
     height = (ROW_COUNT+1) * SQUARESIZE
     size = (window_width, height)
 
@@ -67,7 +111,13 @@ def main():
             print("Error:", e)
             break
 
-        button = create_button(screen, board_width+100, 100, 200, 100, "Not Gate", BLACK, RED)
+        not_gate_1 = create_button(screen, NOT_GATE_1[0], NOT_GATE_1[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Not Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
+        not_gate_2 = create_button(screen, NOT_GATE_2[0], NOT_GATE_2[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Not Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
+        hadamard_gate_1 = create_button(screen, HADAMARD_GATE_1[0], HADAMARD_GATE_1[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Hadamard Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
+        hadamard_gate_2 = create_button(screen, HADAMARD_GATE_2[0], HADAMARD_GATE_2[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Hadamard Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
+        swap_gate = create_button(screen, SWAP_GATE[0], SWAP_GATE[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Swap Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
+        cnot_gate = create_button(screen, CNOT_GATE[0], CNOT_GATE[1], BUTTON_WIDTH, BUTTON_HEIGHT, "CNOT Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
+        noise_gate = create_button(screen, NOISE[0], NOISE[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Noise", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
 
         draw_board(np.flip(game.board, 0), screen, SQUARESIZE, RADIUS, height)
 
@@ -75,8 +125,8 @@ def main():
             if event.type == pygame.QUIT:
                 sys.exit()
 
-            if event.type == pygame.MOUSEMOTION and event.pos[0] < board_width - RADIUS:
-                pygame.draw.rect(screen, BLACK, (0,0, board_width, SQUARESIZE))
+            if event.type == pygame.MOUSEMOTION and event.pos[0] < BOARD_WIDTH - RADIUS:
+                pygame.draw.rect(screen, BLACK, (0,0, BOARD_WIDTH, SQUARESIZE))
                 posx = event.pos[0]
                 if game.current_player == 0:
                     pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), RADIUS)
@@ -85,32 +135,32 @@ def main():
             pygame.display.update()
 
             if event.type == pygame.MOUSEBUTTONDOWN: 
-                pygame.draw.rect(screen, BLACK, (0,0, board_width, SQUARESIZE))
+                pygame.draw.rect(screen, BLACK, (0,0, BOARD_WIDTH, SQUARESIZE))
 
                 if game.current_player == player:
                     posx = event.pos[0]
-                    if posx < board_width - RADIUS:
+                    if posx < BOARD_WIDTH - RADIUS:
                         # clicked on the game board
                         col = int(math.floor(posx/SQUARESIZE))
                         n.send(f"{game.current_player},{col},P")
                         board = np.flip(game.board, 0)
                         print_board(board)
                         draw_board(board, screen, SQUARESIZE, RADIUS, height)
-                    elif button.collidepoint(event.pos):
-                        label = pygame.font.SysFont("monospace", 30).render("Choose column to apply Not Gate", 1, RED)
-                        screen.blit(label, (40,10))
-                        pygame.display.update()
-                        chosen_column = False
-                        while not chosen_column:
-                            for event in pygame.event.get():
-                                if event.type == pygame.MOUSEBUTTONDOWN:
-                                    posx = event.pos[0]
-                                    if posx < board_width - RADIUS:
-                                        col = int(math.floor(posx/SQUARESIZE))
-                                        chosen_column = True
-                                        n.send(f"{game.current_player},{col},X")
-                                        print("Not Gate applied")
-                                        break
+                    elif not_gate_1.collidepoint(event.pos):
+                        choose_gate(screen, n, game, "Not Gate", "X")
+                    elif not_gate_2.collidepoint(event.pos):
+                        choose_gate(screen, n, game, "Not Gate", "X")
+                    elif hadamard_gate_1.collidepoint(event.pos):
+                        choose_gate(screen, n, game, "Hadamard Gate", "H")
+                    elif hadamard_gate_2.collidepoint(event.pos):
+                        choose_gate(screen, n, game, "Hadamard Gate", "H")
+                    elif cnot_gate.collidepoint(event.pos):
+                        choose_gate(screen, n, game, "CNOT Gate", "C")
+                    elif swap_gate.collidepoint(event.pos):
+                        choose_swap_gate(screen, n, game)
+                    elif noise_gate.collidepoint(event.pos):
+                        n.send(f"{game.current_player},-1,N")
+                        print("Noise applied")
 
                     if game.win_condition():
                         label = myfont.render(f"Player {game.current_player} wins!!", 1, RED)
