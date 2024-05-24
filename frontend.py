@@ -7,7 +7,6 @@ from client import main
 Setting up an environment to initialize pygame
 """
 mainClock = pygame.time.Clock()
-from pygame.locals import *
 pygame.init()
 pygame.display.set_caption('Quantum Connect Four')
 screen = pygame.display.set_mode((600, 400), 0, 32)  # Adjusted window size to fit all buttons
@@ -72,14 +71,14 @@ def main_menu():
 
         click = False
         for event in pygame.event.get():
-            if event.type == QUIT:
+            if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-            if event.type == MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     click = True
  
@@ -107,11 +106,11 @@ def options():
  
         draw_text('OPTIONS SCREEN', font, (255, 255, 255), screen, 20, 20)
         for event in pygame.event.get():
-            if event.type == QUIT:
+            if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
                     running = False
        
         pygame.display.update()
@@ -124,11 +123,11 @@ def education():
  
         draw_text('EDUCATION SCREEN', font, (255, 255, 255), screen, 20, 20)
         for event in pygame.event.get():
-            if event.type == QUIT:
+            if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
                     running = False
        
         pygame.display.update()
