@@ -9,7 +9,7 @@ Setting up an environment to initialize pygame
 mainClock = pygame.time.Clock()
 from pygame.locals import *
 pygame.init()
-pygame.display.set_caption('game base')
+pygame.display.set_caption('Quantum Connect Four')
 screen = pygame.display.set_mode((600, 400), 0, 32)  # Adjusted window size to fit all buttons
  
 #setting font settings
@@ -32,7 +32,7 @@ def main_menu():
     while True:
  
         screen.fill((0,190,255))
-        draw_text('Main Menu', font, (0,0,0), screen, 250, 40)
+        draw_text('Game Options', font, (0,0,0), screen, 250, 40)
  
         mx, my = pygame.mouse.get_pos()
 
