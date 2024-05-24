@@ -3,6 +3,7 @@ from network import Network
 import numpy as np
 import sys
 import math
+import time
 from constants import *
 
 def create_board():
@@ -99,7 +100,7 @@ def main():
     pygame.display.set_caption("Quantum Connect Four")
     pygame.display.update()
 
-    myfont = pygame.font.SysFont("monospace", 75)
+    myfont = pygame.font.SysFont("monospace", 30)
 
     while not game_over:
 
@@ -111,6 +112,26 @@ def main():
             print("Error:", e)
             break
 
+        # check win condition
+        if game.win_condition():
+            n.send("reset")
+            if game.current_player == 0:
+                label = myfont.render(f"Yellow wins!", 1, RED)
+            elif game.current_player == 1:
+                label = myfont.render(f"Red wins!", 1, RED)
+            screen.blit(label, (40,10))
+            pygame.display.update()
+            game_over = True
+
+        # check draw condition
+        elif np.all(board != -1):
+            n.send("reset")
+            label = myfont.render(f"It's a Draw", 1, RED)
+            screen.blit(label, (40,10))
+            pygame.display.update()
+            game_over = True
+
+        # create gate buttons
         not_gate_1 = create_button(screen, NOT_GATE_1[0], NOT_GATE_1[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Not Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
         not_gate_2 = create_button(screen, NOT_GATE_2[0], NOT_GATE_2[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Not Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
         hadamard_gate_1 = create_button(screen, HADAMARD_GATE_1[0], HADAMARD_GATE_1[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Hadamard Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
@@ -162,18 +183,10 @@ def main():
                         n.send(f"{game.current_player},-1,N")
                         print("Noise applied")
 
-                    if game.win_condition():
-                        label = myfont.render(f"Player {game.current_player} wins!!", 1, RED)
-                        screen.blit(label, (40,10))
-                        game_over = True
-                    elif np.all(board != -1):
-                        label = myfont.render(f"It's a Draw", 1, RED)
-                        screen.blit(label, (40,10))
-                        game_over = True
-
                 if game_over:
                     pygame.time.wait(1000)
 
+    time.sleep(3)
     return game_over
 
 if __name__ == "__main__":

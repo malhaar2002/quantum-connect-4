@@ -35,11 +35,11 @@ def threaded_client(conn, p, gameId):
                     break
                 else:
                     if data == "reset":
-                        game.reset()
+                        game.win_condition()
                     elif data != "get":
                         data = data.split(",")
                         print(f"Data: {data}")
-                        # check for swap gate
+                        # check for two qubit gate
                         if len(data) == 4:
                             q1 = int(data[1])
                             q2 = int(data[2])
