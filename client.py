@@ -32,7 +32,7 @@ def draw_board(board, screen, SQUARESIZE, RADIUS, height):
 
 def create_button(screen, x, y, width, height, text, text_color, button_color):
     pygame.draw.rect(screen, button_color, (x, y, width, height))
-    text_surface = pygame.font.SysFont("monospace", 20).render(text, True, text_color)
+    text_surface = pygame.font.SysFont("monospace", 18).render(text, True, text_color)
     text_rect = text_surface.get_rect(center=(x + width / 2, y + height / 2))
     screen.blit(text_surface, text_rect)
     return text_rect
@@ -102,6 +102,15 @@ def main():
 
     myfont = pygame.font.SysFont("monospace", 30)
 
+    # create gate buttons
+    not_gate_1 = create_button(screen, NOT_GATE_1[0], NOT_GATE_1[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Not Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
+    not_gate_2 = create_button(screen, NOT_GATE_2[0], NOT_GATE_2[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Not Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
+    hadamard_gate_1 = create_button(screen, HADAMARD_GATE_1[0], HADAMARD_GATE_1[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Hadamard Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
+    hadamard_gate_2 = create_button(screen, HADAMARD_GATE_2[0], HADAMARD_GATE_2[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Hadamard Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
+    swap_gate = create_button(screen, SWAP_GATE[0], SWAP_GATE[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Swap Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
+    cnot_gate = create_button(screen, CNOT_GATE[0], CNOT_GATE[1], BUTTON_WIDTH, BUTTON_HEIGHT, "CNOT Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
+    noise_gate = create_button(screen, NOISE[0], NOISE[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Noise", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
+
     while not game_over:
 
         try:
@@ -131,23 +140,14 @@ def main():
             pygame.display.update()
             game_over = True
 
-        # create gate buttons
-        not_gate_1 = create_button(screen, NOT_GATE_1[0], NOT_GATE_1[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Not Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
-        not_gate_2 = create_button(screen, NOT_GATE_2[0], NOT_GATE_2[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Not Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
-        hadamard_gate_1 = create_button(screen, HADAMARD_GATE_1[0], HADAMARD_GATE_1[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Hadamard Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
-        hadamard_gate_2 = create_button(screen, HADAMARD_GATE_2[0], HADAMARD_GATE_2[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Hadamard Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
-        swap_gate = create_button(screen, SWAP_GATE[0], SWAP_GATE[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Swap Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
-        cnot_gate = create_button(screen, CNOT_GATE[0], CNOT_GATE[1], BUTTON_WIDTH, BUTTON_HEIGHT, "CNOT Gate", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
-        noise_gate = create_button(screen, NOISE[0], NOISE[1], BUTTON_WIDTH, BUTTON_HEIGHT, "Noise", BUTTON_TEXT_COLOR, BUTTON_BG_COLOR)
-
         draw_board(np.flip(game.board, 0), screen, SQUARESIZE, RADIUS, height)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
 
+            pygame.draw.rect(screen, BLACK, (0,0, window_width, SQUARESIZE))
             if event.type == pygame.MOUSEMOTION and event.pos[0] < BOARD_WIDTH - RADIUS:
-                pygame.draw.rect(screen, BLACK, (0,0, BOARD_WIDTH, SQUARESIZE))
                 posx = event.pos[0]
                 if game.current_player == 0:
                     pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), RADIUS)
@@ -169,19 +169,26 @@ def main():
                         draw_board(board, screen, SQUARESIZE, RADIUS, height)
                     elif not_gate_1.collidepoint(event.pos):
                         choose_1qubit_gate(screen, n, game, "Not Gate", "X")
+                        pygame.draw.rect(screen, BLACK, (NOT_GATE_1[0], NOT_GATE_1[1], BUTTON_WIDTH, BUTTON_HEIGHT))
                     elif not_gate_2.collidepoint(event.pos):
                         choose_1qubit_gate(screen, n, game, "Not Gate", "X")
+                        pygame.draw.rect(screen, BLACK, (NOT_GATE_2[0], NOT_GATE_2[1], BUTTON_WIDTH, BUTTON_HEIGHT))
                     elif hadamard_gate_1.collidepoint(event.pos):
                         choose_1qubit_gate(screen, n, game, "Hadamard Gate", "H")
+                        pygame.draw.rect(screen, BLACK, (HADAMARD_GATE_1[0], HADAMARD_GATE_1[1], BUTTON_WIDTH, BUTTON_HEIGHT))
                     elif hadamard_gate_2.collidepoint(event.pos):
                         choose_1qubit_gate(screen, n, game, "Hadamard Gate", "H")
+                        pygame.draw.rect(screen, BLACK, (HADAMARD_GATE_2[0], HADAMARD_GATE_2[1], BUTTON_WIDTH, BUTTON_HEIGHT))
                     elif cnot_gate.collidepoint(event.pos):
                         choose_2qubit_gate(screen, n, game, "CNOT Gate", "C")
+                        pygame.draw.rect(screen, BLACK, (CNOT_GATE[0], CNOT_GATE[1], BUTTON_WIDTH, BUTTON_HEIGHT))
                     elif swap_gate.collidepoint(event.pos):
                         choose_2qubit_gate(screen, n, game, "Swap Gate", "S")
+                        pygame.draw.rect(screen, BLACK, (SWAP_GATE[0], SWAP_GATE[1], BUTTON_WIDTH, BUTTON_HEIGHT))
                     elif noise_gate.collidepoint(event.pos):
                         n.send(f"{game.current_player},-1,N")
                         print("Noise applied")
+                        pygame.draw.rect(screen, BLACK, (NOISE[0], NOISE[1], BUTTON_WIDTH, BUTTON_HEIGHT))
 
                 if game_over:
                     pygame.time.wait(1000)
