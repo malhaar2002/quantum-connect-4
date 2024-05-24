@@ -13,13 +13,13 @@ class Game:
         self.qr = QuantumRegister(COLUMN_COUNT)  
         self.cr = ClassicalRegister(COLUMN_COUNT)
         self.qc = QuantumCircuit(self.qr, self.cr)
-        # self.qc = QuantumCircuit(4, 4)  
         self.secret_x_pending = [0] * 6  # Track pending secret X gates
         self.state_before_hgate = [-1] * 6 # Storing measurement value before applying H gate
         self.h_flag = [0] * 6 # Tracking H gate for each qubit
         self.n_flag = 0 # Tracking Rotation gate for each qubit
         self.filled_column = [0]*6
-        
+        self.cnot_flag = [0] * 6  # Track CNOT gate applications for target qubits
+
         # Apply initial X gates based on the board's configuration
         for qubit in range(6):
             if self.board[5][qubit] == 1:
@@ -44,32 +44,29 @@ class Game:
 
     def update_board(self, player, qubits, action):
         if action == 'X':
-            # Mark a secret X gate for future application
             self.secret_x_pending[qubits] += 1
             self.current_player = 1 - self.current_player
             return  
         
         if action == 'H':
-            self.h_flag[qubits] +=1 # Increment H flag value for that qubits
-            self.state_before_hgate[qubits] = self.measure_qubit(qubits) # Before applying H gate stored qubits's measured value
-            self.qc.h(qubits) # Applying H gate
-            print(f"Player {player} played Hadamard gate on qubits {qubits}:")
+            self.h_flag[qubits] += 1
+            self.state_before_hgate[qubits] = self.measure_qubit(qubits)
+            self.qc.h(qubits)
+            print(f"Player {player} played Hadamard gate on qubit {qubits}:")
             self.current_player = 1 - self.current_player
             return 
         
         if action == 'S':
             self.qc.swap(self.qr[qubits[0]], self.qr[qubits[1]])
-            # Update value of first qubits after swapping
             measured_value = self.measure_qubit(qubits[0])
             for row in reversed(range(6)):
                 if self.board[row][qubits[0]] == -1:
-                    self.board[row+1][qubits[0]] = measured_value
+                    self.board[row + 1][qubits[0]] = measured_value
                     break
-            # Update value of second qubits after swapping
             measured_value = self.measure_qubit(qubits[1])
             for row in reversed(range(6)):
                 if self.board[row][qubits[1]] == -1:
-                    self.board[row+1][qubits[1]] = measured_value
+                    self.board[row + 1][qubits[1]] = measured_value
                     break
             print(f"Player {player} updated the board")
             print(self.board)
@@ -77,7 +74,7 @@ class Game:
             return
         
         if action == 'N':
-            self.n_flag +=1 # Incrementing flag value
+            self.n_flag += 1
             self.current_player = 1 - self.current_player
             return
 
@@ -85,51 +82,44 @@ class Game:
             control_qubit, target_qubit = qubits
             control_value = self.measure_qubit(control_qubit)
             if control_value == 1:
-                for row in range(6):
-                    if self.board[row][target_qubit] != -1:
-                        self.board[row][target_qubit] = 1 - self.board[row][target_qubit]
-                        break
+                self.cnot_flag[target_qubit] = 1  # Set the CNOT flag for the target qubit
             print(f"Player {player} applied CNOT gate with control qubit {control_qubit} and target qubit {target_qubit}")
             print(self.board)
+            self.current_player = 1 - self.current_player
             return
 
-        # Desired outcome aligns with the player's identity (0 or 1)
         desired_outcome = player
 
-        # If there is rotation flag, change the qubits of the player
         if self.n_flag:
             qubits = 5 - np.random.randint(6)
-            self.n_flag -=1
+            self.n_flag -= 1
 
-        if self.secret_x_pending[qubits]== 0:
-            # Measured when no  X gate applied on the qubits. 
-            current_state = self.measure_qubit(qubits) 
-            # If H gate has been applied to that qubits
-        elif self.state_before_hgate[qubits]==0 or self.state_before_hgate[qubits]==1:
-            current_state= self.state_before_hgate[qubits]
+        if self.secret_x_pending[qubits] == 0:
+            current_state = self.measure_qubit(qubits)
+        elif self.state_before_hgate[qubits] == 0 or self.state_before_hgate[qubits] == 1:
+            current_state = self.state_before_hgate[qubits]
             self.state_before_hgate[qubits] = -1
         else:
-            # We only want to measure if there is no X gate applied to that qubits. But if there is 1, we reverse the qubits being measured because the other player when playing their turn won't havre an idea of the X gate. 
             current_state = self.measure_qubit(qubits)
-            # print(self.secret_x_pending[qubits])
             current_state = 1 - current_state
         
         if current_state != desired_outcome:
-            self.qc.x(qubits)  # Apply an X gate to achieve desired outcome
+            self.qc.x(qubits)
 
-        if self.h_flag[qubits] ==0:
-            measured_value = self.measure_qubit(qubits)  # Measure after adjustments
-        else:
-            # initialising value after Hadamard gate
+        if self.h_flag[qubits] == 0:
             measured_value = self.measure_qubit(qubits)
-            self.h_flag[qubits] -=1
-            # Initialising value once the qubits that had a Hadamard gate was measured to avoid any future discrepencies
+        else:
+            measured_value = self.measure_qubit(qubits)
+            self.h_flag[qubits] -= 1
             if measured_value == 1:
                 self.qc.initialize([0, 1], qubits)
             else:
                 self.qc.initialize([1, 0], qubits)
 
-        # Update the board in the lowest available row for the qubits
+        if self.cnot_flag[qubits] == 1:
+            measured_value = 1 - measured_value  # Flip the measured value
+            self.cnot_flag[qubits] = 0  # Reset the flag
+
         for row in reversed(range(6)):
             if self.board[row][qubits] == -1:
                 self.board[row][qubits] = measured_value
@@ -144,30 +134,26 @@ class Game:
         return self.board
     
     def win_condition(self):
-        # Check horizontal lines for a win condition
-        for row in range(6):  # there are 6 rows in a 6x6 board
-            for col in range(3):  # up to the 3rd column to have space for four in a row
+        for row in range(6):
+            for col in range(3):
                 if (self.board[row][col] == self.board[row][col + 1] ==
                     self.board[row][col + 2] == self.board[row][col + 3] != -1):
                     return True
 
-        # Check vertical lines for a win condition
-        for col in range(6):  # there are 6 columns in a 6x6 board
-            for row in range(3):  # up to the 3rd row to have space for four in a row
+        for col in range(6):
+            for row in range(3):
                 if (self.board[row][col] == self.board[row + 1][col] ==
                     self.board[row + 2][col] == self.board[row + 3][col] != -1):
                     return True
 
-        # Check diagonal lines (down-right) for a win condition
-        for row in range(3):  # up to the 3rd row to have space for diagonal four in a row
-            for col in range(3):  # up to the 3rd column to have space for diagonal four in a row
+        for row in range(3):
+            for col in range(3):
                 if (self.board[row][col] == self.board[row + 1][col + 1] ==
                     self.board[row + 2][col + 2] == self.board[row + 3][col + 3] != -1):
                     return True
 
-        # Check diagonal lines (up-right) for a win condition
-        for row in range(3, 6):  # start from the 4th row to the last to have space for diagonal four in a row
-            for col in range(3):  # up to the 3rd column to have space for diagonal four in a row
+        for row in range(3, 6):
+            for col in range(3):
                 if (self.board[row][col] == self.board[row - 1][col + 1] ==
                     self.board[row - 2][col + 2] == self.board[row - 3][col + 3] != -1):
                     return True
