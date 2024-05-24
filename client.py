@@ -174,5 +174,7 @@ def main():
                 if game_over:
                     pygame.time.wait(1000)
 
+    return game_over
+
 if __name__ == "__main__":
     main()
