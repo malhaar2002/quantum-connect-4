@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Connect Four - Rules</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quantum Connect Four - Game Rules</h1>
+    <h2>Objective:</h2>
+    <p>The goal is to connect four of your coins horizontally, vertically, or diagonally.</p>
+    <h2>Game Setup:</h2>
+    <ul>
+        <li>Player 0: Red</li>
+        <li>Player 1: Yellow</li>
+        <li>The bottom row starts with alternating red and yellow coins.</li>
+    </ul>
+    <h2>How to Play:</h2>
+    <ol>
+        <li>Players take turns placing a coin or playing a gate secretly.</li>
+        <li>Coin placements update the board instantly.</li>
+        <li>Gate plays are not shown immediately.</li>
+        <li>Each player has limited gates.</li>
+    </ol>
+    <h2>Number of Gates per Player:</h2>
+    <ul>
+        <li>2 NOT Gates</li>
+        <li>1 Hadamard Gate</li>
+        <li>1 Swap Gate</li>
+        <li>1 CNOT Gate</li>
+        <li>1 Noise Gate</li>
+    </ul>
+    <h2>Gate Rules:</h2>
+    <ul>
+        <li><strong>NOT Gate:</strong> Flips opponent's piece to yours next move.</li>
+        <li><strong>Hadamard Gate:</strong> Adds randomness to the next move.</li>
+        <li><strong>CNOT Gate:</strong> Conditional flip based on control column.</li>
+        <li><strong>Swap Gate:</strong> Swap your piece with the opponent's.</li>
+        <li><strong>Noise:</strong> Opponent's piece placed randomly next move.</li>
+    </ul>
+    <h2>Win Conditions:</h2>
+    <ul>
+        <li><strong>Four in a Row:</strong> Connect four coins to win.</li>
+        <li><strong>Draw:</strong> Board filled without a win.</li>
+    </ul>
+</body>
+</html>

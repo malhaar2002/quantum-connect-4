@@ -3,6 +3,7 @@ Importing important libraries
 """
 import pygame, sys
 from client import main
+import webbrowser
 """
 Setting up an environment to initialize pygame
 """
@@ -101,17 +102,16 @@ This function is called when the "OPTIONS" button is clicked.
 """
 def options():
     running = True
-    while running:
-        screen.fill((0,0,0))
+    webbrowser.open(r'D:\Sem 6\Quantum\Qonnect4\quantum-connect-4\rules.html', new=2)
  
-        draw_text('OPTIONS SCREEN', font, (255, 255, 255), screen, 20, 20)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
+    draw_text('OPTIONS SCREEN', font, (255, 255, 255), screen, 20, 20)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                running = False
        
         pygame.display.update()
         mainClock.tick(60)
