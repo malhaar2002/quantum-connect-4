@@ -36,7 +36,7 @@ def create_button(screen, x, y, width, height, text, text_color, button_color):
     screen.blit(text_surface, text_rect)
     return text_rect
 
-def choose_gate(screen, n, game, gate_name, gate_symbol):
+def choose_1qubit_gate(screen, n, game, gate_name, gate_symbol):
     label = pygame.font.SysFont("monospace", 30).render(f"Choose column to apply {gate_name}", 1, RED)
     screen.blit(label, (40,10))
     pygame.display.update()
@@ -52,10 +52,10 @@ def choose_gate(screen, n, game, gate_name, gate_symbol):
                     print(f"{gate_name} applied")
                     break
 
-def choose_swap_gate(screen, n, game):
+def choose_2qubit_gate(screen, n, game, gate_name, gate_symbol):
     col1, col2 = None, None
     chosen_column_1, chosen_column_2 = False, False
-    label = pygame.font.SysFont("monospace", 30).render(f"Choose Column 1 for SWAP", 1, RED)
+    label = pygame.font.SysFont("monospace", 30).render(f"Choose Column 1 for {gate_name}", 1, RED)
     screen.blit(label, (40,10))
     pygame.display.update()
     while not chosen_column_1:
@@ -67,7 +67,7 @@ def choose_swap_gate(screen, n, game):
                     chosen_column_1 = True
                     break
     pygame.draw.rect(screen, BLACK, (0,0, BOARD_WIDTH, SQUARESIZE))
-    label = pygame.font.SysFont("monospace", 30).render(f"Choose Column 2 for SWAP", 1, RED)
+    label = pygame.font.SysFont("monospace", 30).render(f"Choose Column 2 for {gate_name}", 1, RED)
     screen.blit(label, (40,10))
     pygame.display.update()
     while not chosen_column_2:
@@ -78,7 +78,7 @@ def choose_swap_gate(screen, n, game):
                     col2 = int(math.floor(posx/SQUARESIZE))
                     chosen_column_2 = True
                     break
-    n.send(f"{game.current_player},{col1},{col2},S")
+    n.send(f"{game.current_player},{col1},{col2},{gate_symbol}")
     print(f"Swap Gate applied")
 
 def main():
@@ -147,17 +147,17 @@ def main():
                         print_board(board)
                         draw_board(board, screen, SQUARESIZE, RADIUS, height)
                     elif not_gate_1.collidepoint(event.pos):
-                        choose_gate(screen, n, game, "Not Gate", "X")
+                        choose_1qubit_gate(screen, n, game, "Not Gate", "X")
                     elif not_gate_2.collidepoint(event.pos):
-                        choose_gate(screen, n, game, "Not Gate", "X")
+                        choose_1qubit_gate(screen, n, game, "Not Gate", "X")
                     elif hadamard_gate_1.collidepoint(event.pos):
-                        choose_gate(screen, n, game, "Hadamard Gate", "H")
+                        choose_1qubit_gate(screen, n, game, "Hadamard Gate", "H")
                     elif hadamard_gate_2.collidepoint(event.pos):
-                        choose_gate(screen, n, game, "Hadamard Gate", "H")
+                        choose_1qubit_gate(screen, n, game, "Hadamard Gate", "H")
                     elif cnot_gate.collidepoint(event.pos):
-                        choose_gate(screen, n, game, "CNOT Gate", "C")
+                        choose_2qubit_gate(screen, n, game, "CNOT Gate", "C")
                     elif swap_gate.collidepoint(event.pos):
-                        choose_swap_gate(screen, n, game)
+                        choose_2qubit_gate(screen, n, game, "Swap Gate", "S")
                     elif noise_gate.collidepoint(event.pos):
                         n.send(f"{game.current_player},-1,N")
                         print("Noise applied")
