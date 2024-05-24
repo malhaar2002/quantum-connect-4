@@ -138,24 +138,24 @@ class Game:
             for col in range(3):
                 if (self.board[row][col] == self.board[row][col + 1] ==
                     self.board[row][col + 2] == self.board[row][col + 3] != -1):
-                    return True
+                    return True, self.board[row][col]
 
         for col in range(6):
             for row in range(3):
                 if (self.board[row][col] == self.board[row + 1][col] ==
                     self.board[row + 2][col] == self.board[row + 3][col] != -1):
-                    return True
+                    return True, self.board[row][col]
 
         for row in range(3):
             for col in range(3):
                 if (self.board[row][col] == self.board[row + 1][col + 1] ==
                     self.board[row + 2][col + 2] == self.board[row + 3][col + 3] != -1):
-                    return True
+                    return True, self.board[row][col]
 
         for row in range(3, 6):
             for col in range(3):
                 if (self.board[row][col] == self.board[row - 1][col + 1] ==
                     self.board[row - 2][col + 2] == self.board[row - 3][col + 3] != -1):
-                    return True
+                    return True, self.board[row][col]
 
-        return False
+        return False, False

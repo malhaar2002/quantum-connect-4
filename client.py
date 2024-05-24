@@ -122,12 +122,13 @@ def main():
             break
 
         # check win condition
-        if game.win_condition():
+        game_won, winner = game.win_condition()
+        if game_won:
             n.send("reset")
-            if game.current_player == 0:
-                label = myfont.render(f"Yellow wins!", 1, RED)
-            elif game.current_player == 1:
+            if winner == 0:
                 label = myfont.render(f"Red wins!", 1, RED)
+            elif winner == 1:
+                label = myfont.render(f"Yellow wins!", 1, RED)
             screen.blit(label, (40,10))
             pygame.display.update()
             game_over = True
