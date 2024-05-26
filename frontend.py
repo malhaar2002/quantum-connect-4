@@ -102,7 +102,7 @@ This function is called when the "OPTIONS" button is clicked.
 """
 def options():
     running = True
-    webbrowser.open(r'D:\Sem 6\Quantum\Qonnect4\quantum-connect-4\rules.html', new=2)
+    webbrowser.open(r'rules.html', new=2)
  
     draw_text('OPTIONS SCREEN', font, (255, 255, 255), screen, 20, 20)
     for event in pygame.event.get():
