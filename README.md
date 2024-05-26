@@ -1,16 +1,62 @@
 Quantum computing concepts can be abstract and difficult to grasp for newcomers. This project seeks to create an accessible entry point into the world of quantum mechanics through a gamified version of Connect 4.
 
-# Rules
-Unlike traditional Connect 4, where the objective is simply to connect four of one's own pieces in a line, Quantum Connect 4 adds a layer of strategic depth and unpredictability by granting players special quantum gate cards. Each player will get a fixed number of gate cards that can be used anytime during the game. The gates can only be applied on the first empty grid above the filled columns. They equip the player with unique abilities to alter the state of the game board by manipulating the pieces in ways that mimic quantum operations. Here are the rules of applying different gate cards on the game board: 
-- **Not gate:** Flips the opponent's piece to the player's coin upon the next move. 
-- **Hadamard Gate:** This gate introduces a probabilistic element, where the opponent's piece can either become the player's or remain the opponent's on the following move. The concept mirrors the quantum superposition principle. Both players are informed when and where the Hadamard Gate will be applied. After its application, the player has two options: measuring the gate or applying a CNOT gate on top of it, transforming it into an entangled state. 
-- **CNOT gate:**  Entangles two selected positions on the board, such that a change in one will mirror in the other, showcasing quantum entanglement. 
-- **Swap gate:** This gate enables players to swap the positions of one of their game pieces with one belonging to their opponent. Following the application of this gate, measurements will be taken of both qubits.
-- **Rotation gate:** In the game, instead of employing the quantum rotation gate that alters the angle across the Bloch sphere without changing the measurement, we implemented a similar approach. In this approach, we play the Player's coin that would have been on the ith qubit on the n-ith qubit, changing the opponent's chosen slot from i to n-i.
+### Installation
+To setup the game, start by cloning our repository. Install the dependencies by running `pip install -r requirements.txt`. To play the game on different computers over the same network, change the `SERVER_IP` variable in `constants.py` to your local IPv4 address. You can then start the server by running `python3 server.py`. In a separate terminal, run `python3 client.py` to launch the GUI. After both player run `client.py`, they are connected to the server and the game starts. If you want to try the game on CLI mode instead, run the `project_code.ipynb` file. 
 
+### Objective
+The goal of Quantum Connect 4 is to be the first player to connect four of your coins
+horizontally, vertically, or diagonally on a 6x6 grid.
+### Game Setup
+Players:
+- Player 0: Red
+- Player 1: Yellow
+Initial Board:
+- The bottom row is initialized with alternating red and yellow coins to ensure no bias.
+### How to Play
+1. Turns:
+- Players take turns, choosing to either place a coin in a column or play a gate secretly.
+- If a player places a coin, the game board is updated instantly.
+- If a player plays a gate, nothing is updated immediately (except when the swap gate is applied).
+2. Gates:
+- Each player has a limited number of gates.
+Number of Gates per Player
+- NOT Gate: 2
+- Hadamard Gate: 1
+- Swap Gate: 1
+- CNOT Gate: 1
+- Noise Gate: 1
 
-*To go through an example gameplay, please go through example_game.ipynb*
+### Gate Rules
+1. NOT Gate:
+- Flips the opponent’s piece to the player’s coin upon the next move in the specified
+column.
+- Applied to the first empty slot in the chosen column.
+- The opponent will not know which gate is applied or where.
+2. Hadamard Gate:
+- Introduces a probabilistic element where the opponent’s piece can either become the
+player’s or remain the opponent’s on the next move in the chosen column.
+- Applied to the first empty slot in the chosen column.
+- The opponent will not know which gate is applied or where.
+3. CNOT Gate:
+- Player chooses two columns (control and target).
+- If the control column’s topmost filled coin is a 1 (yellow), placing a coin in the target
+column will flip it.
+4. Swap Gate:
+- Allows players to swap the positions of one of their coins with one of the opponent’s.
+The chosen coins can only be the topmost ones of any column
+- The opponent will see the game board update instantaneously
+5. Noise Gate:
+- Causes the opponent’s coin to be placed randomly in any column during their turn.
+Win Conditions
+1. Four in a Row:
+- Connect four of your coins horizontally, vertically, or diagonally to win.
+2. Draw:
+- The game ends in a draw if the board is completely filled without any player con-
+necting four coins.
+
+*To get a deeper understanding of how our quantum backend works, please go through example_game.ipynb*
 
 # References
 1. <a href='https://fullstackquantumcomputation.tech/blog/post-tutorial-QonnectFour/'> Qonnect four - Making a quantum game
 2. https://github.com/ToJen/quantum-connect-four
+3. https://www.techwithtim.net/tutorials/python-programming/python-online-game-tutorial
