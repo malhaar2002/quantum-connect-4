@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gate Guide</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gate Guide</h1>
+    <p><b> NOT gate - </b> Also known as the X gate, flips the state of a qubit. If the qubit is in state 0, it changes to state 1, and vice versa. It is essential for creating basic quantum logic operations and is equivalent to the classical NOT gate.</p>
+    <p>Example:</p>
+    <pre>X|0⟩ → |1⟩</pre>
+    <pre>X|1⟩ → |0⟩</pre>
+
+
+    <p><b>Hadamard Gate - </b>The Hadamard gate puts a qubit into an equal superposition of 0 and 1. This means that after applying the Hadamard gate, the qubit has a 50% chance of being measured as 0 or 1. It is crucial for creating quantum parallelism and entanglement.</p>
+    <p>Example:</p>
+    <pre>H|0⟩ → (|0⟩ + |1⟩)/√2</pre>
+    <pre>H|1⟩ → (|0⟩ - |1⟩)/√2</pre>
+
+
+    <p><b>Swap Gate - </b>The Swap gate exchanges the states of two qubits. It is used to reorder qubits within a quantum circuit, which can be important for certain quantum algorithms and operations.</p>
+    <p>Example:</p>
+    <pre>Swap(|q1⟩, |q2⟩) → (|q2⟩, |q1⟩)</pre>
+    <p>If |q1⟩ = |0⟩ and |q2⟩ = |1⟩, then after the swap:</p>
+    <pre>Swap(|0⟩, |1⟩) → (|1⟩, |0⟩)</pre>
+
+
+    <p><b>CNOT Gate - </b>The CNOT (Controlled-NOT) gate flips the state of a target qubit if the control qubit is in the state 1. It is a fundamental gate for creating entanglement between qubits, which is a key resource in quantum computing.</p>
+    <p>Example:</p>
+    <pre>CNOT|00⟩ → |00⟩</pre>
+    <pre>CNOT|01⟩ → |01⟩</pre>
+    <pre>CNOT|10⟩ → |11⟩</pre>
+    <pre>CNOT|11⟩ → |10⟩</pre>
+
+
+
+    <p><b>Noise - </b>Noise is not a gate, but it represents the random disturbances that can affect qubits in a quantum system. Modeling noise is important for understanding and improving the reliability of quantum computations.</p>
+</body>
+</html>

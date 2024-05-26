@@ -104,7 +104,7 @@ def options():
     running = True
     webbrowser.open(r'rules.html', new=2)
  
-    draw_text('OPTIONS SCREEN', font, (255, 255, 255), screen, 20, 20)
+    draw_text('Rules for the game', font, (255, 255, 255), screen, 20, 20)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -118,21 +118,19 @@ def options():
 
 def education():
     running = True
-    while running:
-        screen.fill((0,0,0))
+    webbrowser.open(r'gate_guide.html', new=2)
  
-        draw_text('EDUCATION SCREEN', font, (255, 255, 255), screen, 20, 20)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
+    draw_text('Know more about Quantum Gates', font, (255, 255, 255), screen, 20, 20)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                running = False
        
         pygame.display.update()
         mainClock.tick(60)
-
 
 
 main_menu()
