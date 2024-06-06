@@ -1,7 +1,60 @@
 Quantum computing concepts can be abstract and difficult to grasp for newcomers. This project seeks to create an accessible entry point into the world of quantum mechanics through a gamified version of Connect 4.
 
 ### Installation
-To setup the game, start by cloning our repository. Install the dependencies by running `pip install -r requirements.txt`. To play the game on different computers over the same network, change the `SERVER_IP` variable in `constants.py` to your local IPv4 address. You can then start the server by running `python3 server.py`. In a separate terminal, run `python3 client.py` to launch the GUI. After both player run `client.py`, they are connected to the server and the game starts. If you want to try the game on CLI mode instead, run the `project_code.ipynb` file. 
+Follow these steps to set up and play Quantum Connect 4:
+
+1. **Clone the Repository**
+    ```sh
+    git clone https://github.com/malhaar2002/quantum-connect-4.git
+    cd quantum-connect-4
+    ```
+
+2. **Create a Virtual Environment** <br>
+    We recommend creating a virtual environment to avoid any conflicts with existing packages. You can do this using the `venv` module:
+
+    - On Windows:
+        ```sh
+        python -m venv env
+        .\env\Scripts\activate
+        ```
+
+    - On macOS and Linux:
+        ```sh
+        python3 -m venv env
+        source env/bin/activate
+        ```
+
+3. **Install Dependencies** <br>
+    Install the required dependencies by running:
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+4. **Configure Server IP** <br>
+    To play the game on different computers over the same network, update the `SERVER_IP` variable in `constants.py` to your local IPv4 address. For playing on the same computer, you can leave it as `127.0.0.1` (localhost).
+
+5. **Start the Server** <br>
+    Start the server by running:
+    ```sh
+    python3 server.py
+    ```
+
+6. **Launch the Game Clients** <br>
+    Each player should launch the game client. To do this, run the following command on both computers:
+    ```sh
+    python3 client.py
+    ```
+
+    This will start the game GUI for each player.
+
+7. **Playing on a Single Computer** <br>
+    If you want to play the game on a single computer, simply run `client.py` in two separate terminals
+    Both players will then be connected to the server, and the game will start.
+
+8. **Optional: Try CLI Mode**
+    To get a broad understanding of how the quantum gates work, you can try the game in CLI mode by running the Jupyter notebook `project_code.ipynb`:
+
+You are now ready to play Quantum Connect 4!
 
 ### Objective
 The goal of Quantum Connect 4 is to be the first player to connect four of your coins
@@ -10,6 +63,7 @@ horizontally, vertically, or diagonally on a 6x6 grid.
 Players:
 - Player 0: Red
 - Player 1: Yellow
+  
 Initial Board:
 - The bottom row is initialized with alternating red and yellow coins to ensure no bias.
 ### How to Play
@@ -19,12 +73,11 @@ Initial Board:
 - If a player plays a gate, nothing is updated immediately (except when the swap gate is applied).
 2. Gates:
 - Each player has a limited number of gates.
-Number of Gates per Player
-- NOT Gate: 2
-- Hadamard Gate: 1
-- Swap Gate: 1
-- CNOT Gate: 1
-- Noise Gate: 1
+  - NOT Gate: 2
+  - Hadamard Gate: 1
+  - Swap Gate: 1
+  - CNOT Gate: 1
+  - Noise Gate: 1
 
 ### Gate Rules
 1. NOT Gate:
@@ -47,7 +100,7 @@ The chosen coins can only be the topmost ones of any column
 - The opponent will see the game board update instantaneously
 5. Noise Gate:
 - Causes the opponent’s coin to be placed randomly in any column during their turn.
-Win Conditions
+### Win Conditions
 1. Four in a Row:
 - Connect four of your coins horizontally, vertically, or diagonally to win.
 2. Draw:
@@ -56,7 +109,7 @@ necting four coins.
 
 *To get a deeper understanding of how our quantum backend works, please go through example_game.ipynb*
 
-# References
+### References
 1. <a href='https://fullstackquantumcomputation.tech/blog/post-tutorial-QonnectFour/'> Qonnect four - Making a quantum game
 2. https://github.com/ToJen/quantum-connect-four
 3. https://www.techwithtim.net/tutorials/python-programming/python-online-game-tutorial
