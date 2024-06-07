@@ -40,6 +40,16 @@ Follow these steps to set up and play Quantum Connect 4:
     ```
 
 6. **Launch the Game Clients** <br>
+    You can launch the game with main menu or start the game directly with the client.<br>
+   
+    To launch the main menu, run the following command:
+   ```sh
+    python3 frontend.py
+    ```
+   This has options to Play the game, View the rules of the game and to know more about gates in Quantum Computing.
+   To start the game, click on `Play Game` button.
+
+   To start the game directly, 
     Each player should launch the game client. To do this, run the following command on both computers:
     ```sh
     python3 client.py
@@ -47,11 +57,11 @@ Follow these steps to set up and play Quantum Connect 4:
 
     This will start the game GUI for each player.
 
-7. **Playing on a Single Computer** <br>
+8. **Playing on a Single Computer** <br>
     If you want to play the game on a single computer, simply run `client.py` in two separate terminals
     Both players will then be connected to the server, and the game will start.
 
-8. **Optional: Try CLI Mode**
+9. **Optional: Try CLI Mode**
     To get a broad understanding of how the quantum gates work, you can try the game in CLI mode by running the Jupyter notebook `project_code.ipynb`:
 
 You are now ready to play Quantum Connect 4!
